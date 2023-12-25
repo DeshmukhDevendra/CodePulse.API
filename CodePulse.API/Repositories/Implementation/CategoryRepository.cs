@@ -17,13 +17,24 @@ namespace CodePulse.API.Repositories.Implementation
         {
             await dbContext.Categories.AddAsync(category);
             await dbContext.SaveChangesAsync();
-            
+
             return category;
         }
 
-        public Task DeleteAsync(int id)
+        public async Task<Category?> DeleteAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var existingCategory = await dbContext.Categories.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (existingCategory != null)
+            {
+                dbContext.Categories.Remove(existingCategory);
+                await dbContext.SaveChangesAsync();
+                return existingCategory;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public async Task<IEnumerable<Category>> GetAllAsync()
@@ -38,10 +49,10 @@ namespace CodePulse.API.Repositories.Implementation
 
         public async Task<Category> UpdateAsync(Category category)
         {
-            
+
             var existingCategory = await dbContext.Categories.FirstOrDefaultAsync(x => x.Id == category.Id);
-            
-            if (existingCategory != null) 
+
+            if (existingCategory != null)
             {
                 dbContext.Entry(existingCategory).CurrentValues.SetValues(category);
                 await dbContext.SaveChangesAsync();
